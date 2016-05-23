@@ -1,0 +1,33 @@
+% Template: Math in LaTeX (BenMathTemplate.sty)
+
+\usepackage{mathtools}
+\usepackage{siunitx} % Benutzung: \SI{1}{\metre}
+\usepackage{bm}
+
+
+%%% Commands %%%
+\newcommand{\eq}[2]{\begin{equation}\label{eq:#2}#1\end{equation}}
+\newcommand{\eqnn}[1]{\begin{equation*}#1\end{equation*}}
+
+\newcommand{\eqal}[1]{\begin{align}#1\end{align}}
+\newcommand{\eqalnn}[1]{\begin{align*}#1\end{align*}}
+
+\newcommand{\eqga}[1]{\begin{gather}#1\end{gather}}
+\newcommand{\eqgann}[1]{\begin{gather*}#1\end{gather*}}
+
+\newcommand{\eqsp}[1]{\begin{split}#1\end{split}}
+
+
+\newcommand{\glref}[1]{Gl.~(\ref{eq:#1})}
+\newcommand{\figref}[1]{Abb.~\ref{fig:#1}}
+\newcommand{\absref}[1]{Abschn.~\ref{sec:#1}}
+\newcommand{\tblref}[1]{Tab.~\ref{tbl:#1}}
+
+\newcommand{\mean}[2]{\left \langle #1 \right \rangle_{#2}}
+
+\newcommand{\nbra}[1]{\! \left ( #1 \right )}
+\newcommand{\ebra}[1]{\! \left [ #1 \right ]}
+\newcommand{\sbra}[1]{\! \left \lbrace #1 \right \rbrace}
+
+\newcommand{\dif}{\mathrm{d}}
+

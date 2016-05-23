@@ -1,0 +1,61 @@
+% Template-Class: Text in LaTeX (BenTextTemplate.sty)
+%\documentclass[%
+%	paper=A4,	% stellt auf A4-Papier
+%	pagesize,	% gibt Papiergröße weiter
+%	DIV=calc,	% errechnet Satzspiegel
+%	smallheadings,	% kleinere Überschriften
+%	ngerman		% neue Rechtschreibung
+%]{scrartcl}
+\usepackage[left=3cm,right=3cm,top=2cm,bottom=2cm,includeheadfoot]{geometry}
+\usepackage[T1]{fontenc}	% Schriftenkodierung
+\usepackage[utf8x]{inputenc}	% Eingabekodierung Parameter
+
+\usepackage{%
+	babel,		% mehrsprachiger Textsatz
+	fixltx2e	% verbessert einige Kernkompetenzen von LaTeX2e
+}
+\usepackage{%
+	ellipsis,	% korrigiert Weißraum um Auslassungspunkte
+	ragged2e,	% ermöglicht Flattersatz mit Silbentrennung
+	marginnote	% bessere Randnotizen
+}
+\usepackage[tracking=true]{microtype}
+
+\usepackage{%
+	lmodern,	% Ersatz fuer Computer Modern-Schriften
+	hfoldsty,	% Umstellung der Ziffern auf Minuskel- o. Mediävalziffern
+	charter		% Schriftart Charter
+}
+%\usepackage[osf,sc]{mathpazo} % Palatino als Schrift mit Minuskel-Ziffern und echten Kapitälchen
+\usepackage{url}	% Darstellung von URLs
+
+\usepackage{calc}	% working with lengths , counters etc. (\setcounter, \addtocounter, \setlength, \addtolength)
+
+\usepackage{%
+	graphicx,	% einbinden von Grafiken
+	wrapfig,	% Grafiken mit Textumfluss
+	tabularx	% Tabellenumgebung
+}
+\usepackage[%
+	normal		%
+]{caption2}		% Beschriftung für Grafiken etc.
+
+\usepackage{xcolor}	% Farben (\definecolor{mydotcolor}{HTML}{022840} oder \definecolor{black}{rgb}{0,0,0})
+\usepackage{tikz}	% Zeichnungen (z.B. Kästchen mit Farbe als Übergabeparameter: \newcommand{\mycbox}[1]{\tikz{\path[draw=#1,fill=#1] (0,0) rectangle (5pt,5pt);}})
+
+\usepackage{%
+	multirow,	% übergreifende Zeilen in Tabellen
+	booktabs,	% schöne Tabellen
+	enumitem	% schönere Aufzählungen
+}
+
+\usepackage{bigfoot}	% für schöne Fussnoten
+\usepackage{scrpage2}	% für schönere Kopf- und Fusszeilen
+\pagestyle{scrheadings}	% aktiviert Seitenstil von scrpage2
+\usepackage{tocloft}	% Kontrolle über ToC, LoF, LoT ...
+
+\usepackage[%
+%	pdfpagemode=FullScreen,	%
+	hidelinks	%
+]{hyperref}
+
