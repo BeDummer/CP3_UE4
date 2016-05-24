@@ -50,14 +50,15 @@ __global__ void reduceInterleaved (int *g_idata, int *g_odata, unsigned int n)
     // write result for this block to global mem
     if (tid == 0) g_odata[blockIdx.x] = g_idata[idx];
 }
+// implemented q dependend kernel function
 
-__global__ void reduceUnrolling (int *g_idata, int *g_odata, unsigned int n, unsigned int q)
+__global__ void reduceUnrolling (int *g_idata, int *g_odata, unsigned int n, unsigned int q) //added int q
 {
     // set thread ID
     unsigned int tid = threadIdx.x;
-    unsigned int idx = blockIdx.x * blockDim.x * q + threadIdx.x;
+    unsigned int idx = blockIdx.x * blockDim.x * q + threadIdx.x; // q adapted idx
 
-    // unroll 2
+    // unroll analogous q
     if (idx + blockDim.x*(q-1) < n)
     {
       for (int i=1; i<=(q-1); i++)
@@ -160,17 +161,17 @@ int main(int argc, char **argv)
     printf("gpu Interleaved elapsed %f sec gpu_sum: %d <<<grid %d block "
            "%d>>>\n", iElaps, gpu_sum, grid.x, block.x);
 
-    // kernel: reduceUnrolling
+    // kernel: reduceUnrolling optimized with q
     if (grid.x>1)
     {  
-      for(int q=2; q <= size / blocksize ;q=q*2)
+      for(int q=2; q <= size / blocksize ;q=q*2) // alway multiples of 2*q
       {
     
-       dim3 gridq ((grid.x + 1)/q,1);
+       dim3 gridq ((grid.x + 1)/q,1); // change grid dim due to q
        CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
        CHECK(cudaDeviceSynchronize());
        iStart = seconds();
-       reduceUnrolling<<<gridq.x, block>>>(d_idata, d_odata, size,q);
+       reduceUnrolling<<<gridq.x, block>>>(d_idata, d_odata, size,q); // call optimized kernel function w. q
        CHECK(cudaDeviceSynchronize());
        iElaps = seconds() - iStart;
        CHECK(cudaGetLastError());
@@ -180,7 +181,7 @@ int main(int argc, char **argv)
 
        for (int i = 0; i < gridq.x; i++) gpu_sum += h_odata[i];
 
-       printf("gpu Unrolling  elapsed %f sec gpu_sum: %d <<<grid %d block "
+       printf("gpu Unrolling optimized w. q  elapsed %f sec gpu_sum: %d <<<grid %d block "
               "%d>>>\n", iElaps, gpu_sum, gridq.x, block.x);
     }
       }
