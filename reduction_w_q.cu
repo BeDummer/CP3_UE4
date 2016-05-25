@@ -61,7 +61,7 @@ __global__ void reduceUnrolling (int *g_idata, int *g_odata, unsigned int n, uns
     // unroll analogous q
     if (idx + blockDim.x*(q-1) < n)
     {
-      for (int i=1; i<=(q-1); i++)
+      for (int i=1; i<q; i++)
       {
 	g_idata[idx] += g_idata[idx + blockDim.x*i];
       }
