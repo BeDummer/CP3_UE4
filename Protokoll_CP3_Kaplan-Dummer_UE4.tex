@@ -31,6 +31,9 @@ In Abb.1 l"asst sich au\ss erdem noch eine starke Differenz der Laufzeiten zwisc
 \section*{Aufgabe 4.iv}
 Hier wurde q als Potenz von $2$ implementiert. Das Optimum der Laufzeit wurde f"ur fast alle Blockgr"o\ss en (analog zu i) ) bei $q=2^11=2048$ gefunden. Nur bei Blockgr"o\ss e $32$ wurde ein $q=4096$ erhalten. Auffallend war, dass q auch hier einen Einfluss auf die absolute Laufzeit der unterschiedlichen Blockgr"o\ss en hatte: im Test wurde die schnellste Laufzeit von $t_{unrollOpt}=1.42 ms$ f"ur eine Blocksize von $1024$ gefunden.
 
+\section*{Aufgabe 4.v}
+Ausgehend von unserer Analyse in iv) haben wir nun also unsere optimierte Reduktion f"uer den Datentyp \texttt{double} mit der besten Blockgr"o\ss e $1024$ und dem optimalen $q=2048$ erweitert.
+
 
 
 \section*{Anhänge}
