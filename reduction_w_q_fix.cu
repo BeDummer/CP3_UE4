@@ -8,7 +8,7 @@
  */
 
 // Recursive Implementation of Interleaved Pair Approach
-double recursiveReduce(double *data, int const size)
+int recursiveReduce(int *data, int const size)
 {
     // terminate check
     if (size == 1) return data[0];
@@ -26,9 +26,33 @@ double recursiveReduce(double *data, int const size)
     return recursiveReduce(data, stride);
 }
 
+// Kernel: Interleaved Pair Implementation
+__global__ void reduceInterleaved (int *g_idata, int *g_odata, unsigned int n)
+{
+    // set thread ID
+    unsigned int tid = threadIdx.x;
+    unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    // boundary check
+    if(idx >= n) return;
+
+    // in-place reduction in global memory
+    for (int stride = blockDim.x / 2; stride > 0; stride /= 2)
+    {
+        if (tid < stride)
+        {
+            g_idata[idx] += g_idata[idx + stride];
+        }
+
+        __syncthreads();
+    }
+
+    // write result for this block to global mem
+    if (tid == 0) g_odata[blockIdx.x] = g_idata[idx];
+}
 // implemented q dependend kernel function
 
-__global__ void reduceUnrolling (double *g_idata, double *g_odata, unsigned int n, unsigned int q) //added int q
+__global__ void reduceUnrolling (int *g_idata, int *g_odata, unsigned int n, unsigned int q) //added int q
 {
     // set thread ID
     unsigned int tid = threadIdx.x;
@@ -90,41 +114,57 @@ int main(int argc, char **argv)
     printf("grid %d block %d\n", grid.x, block.x);
 
     // allocate host memory
-    size_t bytes = size * sizeof(double);
-    double *h_idata = (double *) malloc(bytes);
-    double *h_odata = (double *) malloc(grid.x * sizeof(double));
-    double *tmp     = (double *) malloc(bytes);
+    size_t bytes = size * sizeof(int);
+    int *h_idata = (int *) malloc(bytes);
+    int *h_odata = (int *) malloc(grid.x * sizeof(int));
+    int *tmp     = (int *) malloc(bytes);
 
     // initialize the array
     int sign=1;
     for (int i = 0; i < size; i++)
     {
         // mask off high 2 bytes to force max number to 255
-        h_idata[i] = sign*((double)( rand() & 0xFF ));
+        h_idata[i] = sign*((int)( rand() & 0xFF ));
         sign*=-1;
     }
 
     memcpy (tmp, h_idata, bytes);
 
     double iStart, iElaps;
-    double gpu_sum = 0.0;
+    int gpu_sum = 0;
 
     // allocate device memory
-    double *d_idata = NULL;
-    double *d_odata = NULL;
+    int *d_idata = NULL;
+    int *d_odata = NULL;
     CHECK(cudaMalloc((void **) &d_idata, bytes));
-    CHECK(cudaMalloc((void **) &d_odata, grid.x * sizeof(double)));
+    CHECK(cudaMalloc((void **) &d_odata, grid.x * sizeof(int)));
 
-        // cpu reduction
+    // cpu reduction
     iStart = seconds();
-    double cpu_sum = recursiveReduce (tmp, size);
+    int cpu_sum = recursiveReduce (tmp, size);
     iElaps = seconds() - iStart;
-    printf("cpu reduce      elapsed %f sec cpu_sum: %f\n", iElaps, cpu_sum);
-    
-      // kernel: reduceUnrolling optimized with q
+    printf("cpu reduce      elapsed %f sec cpu_sum: %d\n", iElaps, cpu_sum);
+
+    // kernel: reduceInterleaved
+    CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
+    CHECK(cudaDeviceSynchronize());
+    iStart = seconds();
+    reduceInterleaved<<<grid, block>>>(d_idata, d_odata, size);
+    CHECK(cudaDeviceSynchronize());
+    iElaps = seconds() - iStart;
+    CHECK(cudaGetLastError());
+    CHECK(cudaMemcpy(h_odata, d_odata, grid.x * sizeof(int),
+                     cudaMemcpyDeviceToHost));
+    gpu_sum = 0;
+
+    for (int i = 0; i < grid.x; i++) gpu_sum += h_odata[i];
+
+    printf("gpu Interleaved elapsed %f sec gpu_sum: %d <<<grid %d block "
+           "%d>>>\n", iElaps, gpu_sum, grid.x, block.x);
+
+    // kernel: reduceUnrolling optimized with q
     if (grid.x>1)
-    {  
- 
+    {   
        dim3 gridq ((grid.x + 1)/q,1); // change grid dim due to q
        CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
        CHECK(cudaDeviceSynchronize());
@@ -133,13 +173,13 @@ int main(int argc, char **argv)
        CHECK(cudaDeviceSynchronize());
        iElaps = seconds() - iStart;
        CHECK(cudaGetLastError());
-       CHECK(cudaMemcpy(h_odata, d_odata, gridq.x * sizeof(double),
+       CHECK(cudaMemcpy(h_odata, d_odata, gridq.x * sizeof(int),
                         cudaMemcpyDeviceToHost));
        gpu_sum = 0;
 
        for (int i = 0; i < gridq.x; i++) gpu_sum += h_odata[i];
 
-       printf("gpu Unrolling optimized w. q = %d  elapsed %f sec gpu_sum: %f <<<grid %d block "
+       printf("gpu Unrolling optimized w. q = %d  elapsed %f sec gpu_sum: %d <<<grid %d block "
               "%d>>>\n", q, iElaps, gpu_sum, gridq.x, block.x);
       }
     // free host memory
