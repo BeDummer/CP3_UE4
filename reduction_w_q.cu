@@ -101,7 +101,7 @@ int main(int argc, char **argv)
     printf("    with array size %d  ", size);
 
     // execution configuration
-    int blocksize = 128;   // initial block size
+    int blocksize = 1024;   // initial block size
 
     if(argc > 1)
     {
@@ -181,8 +181,8 @@ int main(int argc, char **argv)
 
        for (int i = 0; i < gridq.x; i++) gpu_sum += h_odata[i];
 
-       printf("gpu Unrolling optimized w. q  elapsed %f sec gpu_sum: %d <<<grid %d block "
-              "%d>>>\n", iElaps, gpu_sum, gridq.x, block.x);
+       printf("gpu Unrolling optimized w. q = %d  elapsed %f sec gpu_sum: %d <<<grid %d block "
+              "%d>>>\n", q, iElaps, gpu_sum, gridq.x, block.x);
     }
       }
     // free host memory
