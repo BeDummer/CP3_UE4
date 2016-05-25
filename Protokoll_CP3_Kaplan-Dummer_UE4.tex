@@ -16,8 +16,12 @@
 \maketitle
 Online-Version: \href{https://www.github.com/BeDummer/CP3_UE4}{\url{https://www.github.com/BeDummer/CP3_UE4}}
 
-\section*{Aufgabe 4.1}
+\section*{Aufgabe 4.i}
+Hier sollten die Laufzeiten fuer $n=2^24$ Elemente fuer unterschiedliche Blockgroessen mithilfe von \texttt{nvprof ./a.out} gemessen werden. Vergleichend wurden die elapsed Zeiten fuer die Implementierung \texttt{reduceInterleaved} und \texttt{reducedUnrolling} aufgenommen. Gefunden wurde ein Minimum bei Blocksize = 128 (siehe Abb. 1) 
 
+\section*{Aufgabe 4.ii}
+Nun konnten auch Global Load Throughput, Global Load Efficiency und Achieved Occupancy gemessen werden. Hier wurden mittels \texttt{nvprof --metrics gld_efficiency,gld_throughput,achieved_occupancy ./a.out} die Durchschnittswerte ermittelt.
+ABBILDUNGEN
 
 \section*{Anhänge}
 \begin{itemize}
