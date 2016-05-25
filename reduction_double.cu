@@ -7,6 +7,24 @@
  * parallel reduction in CUDA. For this example, the sum operation is used.
  */
 
+// Recursive Implementation of Interleaved Pair Approach
+double recursiveReduce(double *data, int const size)
+{
+    // terminate check
+    if (size == 1) return data[0];
+
+    // renew the stride
+    int const stride = size / 2;
+
+    // in-place reduction
+    for (int i = 0; i < stride; i++)
+    {
+        data[i] += data[i + stride];
+    }
+
+    // call recursively
+    return recursiveReduce(data, stride);
+}
 
 // implemented q dependend kernel function
 
@@ -97,6 +115,12 @@ int main(int argc, char **argv)
     CHECK(cudaMalloc((void **) &d_idata, bytes));
     CHECK(cudaMalloc((void **) &d_odata, grid.x * sizeof(double)));
 
+        // cpu reduction
+    iStart = seconds();
+    double cpu_sum = recursiveReduce (tmp, size);
+    iElaps = seconds() - iStart;
+    printf("cpu reduce      elapsed %f sec cpu_sum: %f\n", iElaps, cpu_sum);
+    
       // kernel: reduceUnrolling optimized with q
     if (grid.x>1)
     {  
@@ -115,7 +139,7 @@ int main(int argc, char **argv)
 
        for (int i = 0; i < gridq.x; i++) gpu_sum += h_odata[i];
 
-       printf("gpu Unrolling optimized w. q = %d  elapsed %f sec gpu_sum: %d <<<grid %d block "
+       printf("gpu Unrolling optimized w. q = %d  elapsed %f sec gpu_sum: %f <<<grid %d block "
               "%d>>>\n", q, iElaps, gpu_sum, gridq.x, block.x);
       }
     // free host memory
